@@ -32,6 +32,6 @@ public class IceCreamT {
 
     @Override
     public String toString() {
-        return flavor + ", price: " + price ;
+        return flavor + " ice cream for " + price + " euros.";
     }
 }

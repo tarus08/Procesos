@@ -1,12 +1,23 @@
 package heladeriaProfe;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class IceCreamManT extends Thread {
 
     private String name;
-    public static int iceCreamToMake;
+    /*
+        the numIceCreamToMake was static, which meant that this variable was shared
+        across the code, if you got: 38,40,40,40,40; then you would have 2 numbers, not 5
+     */
+    private int numIceCreamToMake;
+    // list to store the generated numbers
+    private static final List<Integer> generatedNumbersList = new ArrayList<>();
+    //lock to access the numbers
+    private static ReentrantLock lock = new ReentrantLock();
     public IceCreamManT(String name) {
         this.name = name;
     }
@@ -16,9 +27,22 @@ public class IceCreamManT extends Thread {
 
     @Override
     public void run() {
-        iceCreamToMake = (int) (Math.random() * 20 + 30);
-        System.out.println("I am the ice cream man number "+ name +" and I will make "+iceCreamToMake+ " ice creams.");
-        for (int i = 0; i < iceCreamToMake; i++) {
+
+        numIceCreamToMake = (int) (Math.random() * 20 + 30);
+        try
+        {
+            // access the number of ice creams to make
+            lock.lock();
+            // add the randomly generated number of ice creams to sum them
+            generatedNumbersList.add(numIceCreamToMake);
+            System.out.println("I am the ice cream man number "+ name +" and I will make "+ numIceCreamToMake + " ice creams.");
+        }
+        finally
+        {
+            lock.unlock();
+        }
+        for (int i = 0; i < numIceCreamToMake; i++)
+        {
             try {
                 IceCreamT iceCreamT = new IceCreamT();
                 IceBoxT.addIceCream(iceCreamT, name);
@@ -27,7 +51,24 @@ public class IceCreamManT extends Thread {
                 Logger.getLogger(IceCreamManT.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        System.out.println("I am the ice cream man number "+ name +" and I died -.-");
+    }
+
+    static int getTotalNumOfIceCream()
+    {
+        int total = 0;
+        try
+        {
+            lock.lock();
+            for (Integer sum : generatedNumbersList)
+            {
+                total += sum;
+            }
+        }
+        finally
+        {
+            lock.unlock();
+        }
+        return total;
     }
 
     public String getNombre() {
@@ -38,12 +79,12 @@ public class IceCreamManT extends Thread {
         this.name = name;
     }
 
-    public static int getIceCreamToMake() {
-        return iceCreamToMake;
+    public int getNumIceCreamToMake() {
+        return numIceCreamToMake;
     }
 
-    public static void setIceCreamToMake(int iceCreamToMake) {
-        IceCreamManT.iceCreamToMake = iceCreamToMake;
+    public void setNumIceCreamToMake(int numIceCreamToMake) {
+        this.numIceCreamToMake = numIceCreamToMake;
     }
 
     @Override
