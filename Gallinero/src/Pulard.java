@@ -7,10 +7,10 @@ public class Pulard implements Runnable{
 
     @Override
     public void run() {
-        while (EggCup.getEggStack().size() < 12) {
+        for (int i = 0; i < 12; i++) {
             try {
                 EggCup.addEgg(new Egg(namePulard, (int) (Math.random() * 41 + 80)));
-                Thread.sleep(2000);
+                Thread.sleep((long) (Math.random()*4000+1000));
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

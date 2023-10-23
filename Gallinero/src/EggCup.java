@@ -1,45 +1,42 @@
 import java.util.Stack;
 import java.util.concurrent.locks.ReentrantLock;
-
 public class EggCup {
-
     private static Stack<Egg> eggStack = new Stack<>();
     private static ReentrantLock lock = new ReentrantLock();
+    private static final int MAX_EGGS = 12;
+    private static final int MAX_WEIGHT = 200;
+
     public EggCup() {}
     public static void addEgg(Egg egg) {
         lock.lock();
         try {
-            while (eggStack.size() >= 12) {
+            while (eggStack.size() >= MAX_EGGS) {
                 try {
                     lock.unlock();
-                    Thread.sleep(3000);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 } finally {
                     lock.lock();
                 }
             }
-            eggStack.push(egg);
-            System.out.println(egg + ".\t Egg number: " + eggStack.size());
+                eggStack.push(egg);
+                System.out.println(egg + ".\t Egg number: " + eggStack.size());
         } finally {
             lock.unlock();
         }
     }
 
-
-    public static void stealEgg(String name) {
+    public static void stealEgg(Predator predator) {
         Egg eatenEgg;
         lock.lock();
-        try
-        {
-            while (eggStack.isEmpty() && 200 > Vulture.getWeight())
-            {
-                try
-                {
+        try {
+            while (eggStack.isEmpty() && MAX_WEIGHT > predator.getPredatorWeight()) {
+                try {
                     lock.unlock();
                     Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
                 } finally {
                     lock.lock();
                 }
@@ -47,20 +44,8 @@ public class EggCup {
 
             if (!eggStack.isEmpty()) {
                 eatenEgg = eggStack.pop();
-
-                if (name.contains("Vulture") && Vulture.getWeight() < 200) {
-                    Vulture.calculateWeight(eatenEgg.getWeight());
-                    System.out.println("I am " + name + " and I ate this egg: " + eatenEgg + ". Total weight: " + Vulture.getWeight() + ".\t Eggs left: " + eggStack.size());
-                    if (Vulture.getWeight() >= 200) {
-                        System.out.println(name + " is full. See ya!");
-                    } else {
-                        System.out.println(name + " is " + (200 - Vulture.getWeight()) + " from being full.");
-                    }
-                } else if (name.contains("Magpie")) {
-                    System.out.println("I am " + name + " and I ate this egg: " + eatenEgg + ". See ya! \t Eggs left: " + eggStack.size());
-                } else {
-                    System.out.println("There are no predators available...");
-                }
+                predator.eatEggMessage(eatenEgg);
+                predator.calculateWeight(eatenEgg.getWeight());
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -75,5 +60,6 @@ public class EggCup {
     public static Stack<Egg> getEggStack() {
         return eggStack;
     }
+
 }
 

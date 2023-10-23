@@ -1,5 +1,3 @@
-import java.util.concurrent.locks.ReentrantLock;
-
 public class Farmer
 {
     private static final long MAX_RUNNING_TIME = 7000;
@@ -31,7 +29,7 @@ public class Farmer
         // vulture
         for (int i = 0; i < 2; i++)
         {
-            new Thread(new Vulture("Vulture " +i, 0)).start();
+            new Thread(new Vulture("Vulture " +i)).start();
         }
 
         // pulard

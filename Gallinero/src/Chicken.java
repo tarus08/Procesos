@@ -8,12 +8,12 @@ public class Chicken implements Runnable
 
     @Override
     public void run () {
-        while (EggCup.getEggStack().size() < 12) {
+        for (int i = 0; i < 12; i++) {
             try {
                 EggCup.addEgg(new Egg(nameChicken, (int) (Math.random() * 51 + 25)));
-                Thread.sleep(1000);
+                Thread.sleep((long) (Math.random()*4000+1000));
             } catch (InterruptedException e) {
-                System.out.println(e.getMessage());
+                throw new RuntimeException(e);
             }
         }
     }

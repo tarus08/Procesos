@@ -1,43 +1,28 @@
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Vulture implements Runnable{
-    private static String vultureName;
-    private static int vultureWeight;
-    private static ReentrantLock consumerLock = new ReentrantLock();
+public class Vulture implements Runnable, Predator{
+    private String vultureName;
+    private int vultureWeight;
+    private static final ReentrantLock consumerLock = new ReentrantLock();
+    private static final int MAX_WEIGHT = 200;
 
-    public Vulture(String vultureName, int vultureWeight) {
-        Vulture.vultureName = vultureName;
-        Vulture.vultureWeight = vultureWeight;
-    }
-
-    public static void calculateWeight(int eggWeight)
-    {
-        try
-        {
-            consumerLock.lock();
-            vultureWeight += eggWeight;
-        } finally {
-            consumerLock.unlock();
-        }
+    public Vulture(String vultureName) {
+        this.vultureName = vultureName;
+        this.vultureWeight = 0;
     }
 
     @Override
     public void run() {
-        try
-        {
+        try {
             consumerLock.lock();
-            while (getWeight() < 200)
-            {
-                consumerLock.unlock();
-                EggCup.stealEgg(vultureName);
+            System.out.println(getPredatorName() + " is starting to steal.");
+            while (getPredatorWeight() < MAX_WEIGHT) {
+                EggCup.stealEgg(this);
                 try {
                     Thread.sleep(1000);
-                }
-                catch (InterruptedException e)
-                {
+                } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
                 }
-                consumerLock.lock();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -46,18 +31,35 @@ public class Vulture implements Runnable{
         }
     }
 
-    public static int getWeight() {
+    @Override
+    public String getPredatorName() {
+        return vultureName;
+    }
+
+    @Override
+    public int getPredatorWeight() {
         return vultureWeight;
     }
 
-    public static void setVultureWeight(int vultureWeight) {
-        Vulture.vultureWeight = vultureWeight;
+    @Override
+    public void calculateWeight(int eggWeight) {
+        int newWeight = getPredatorWeight() + eggWeight;
+        if (newWeight <= MAX_WEIGHT) {
+            vultureWeight = newWeight;
+            System.out.println("Total weight: " + newWeight + ". " +getPredatorName() + " is " + (MAX_WEIGHT - newWeight) + " from being full.");
+        } else {
+            setVultureWeight(MAX_WEIGHT);
+            System.out.println(getPredatorName() + " is full. See ya!");
+        }
     }
 
-    public String getVultureName() {
-        return vultureName;
+    @Override
+    public void eatEggMessage(Egg eatenEgg) {
+        System.out.println("I am " + getPredatorName() + " and I ate this egg: " + eatenEgg +
+                ".\t Eggs left: " + EggCup.getEggStack().size());
     }
-    public static void setVultureName (String vultureName) {
-        Vulture.vultureName = vultureName;
+
+    public void setVultureWeight(int vultureWeight) {
+        this.vultureWeight = vultureWeight;
     }
 }
